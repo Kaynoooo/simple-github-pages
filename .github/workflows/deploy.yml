@@ -1,17 +1,33 @@
-name: Deploy to GitHub Pages
+name: Deploy and Test GitHub Pages
 
 on:
   push:
     branches:
       - main
+      - test  # Ajout de la branche test
 
 jobs:
-  build:
+  test:
+    if: github.ref == 'refs/heads/test'
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Mise à jour vers v3
+
+      - name: Run HTML validation
+        run: |
+          echo "Vérification du HTML..."
+          grep "<!DOCTYPE html>" index.html || exit 1
+          echo "Tests réussis !"
+
+  build:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
@@ -19,3 +35,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: .
           publish_branch: gh-pages
+
